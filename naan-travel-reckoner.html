@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="light dark" />
+<title>Naan Travel Reckoner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light dark;
+    --desk: #dccfa4;
+    --paper: #f1e9d0;
+    --paper-deep: #e1d4ab;
+    --ink: #202b36;
+    --ink-soft: #5c6b73;
+    --rule: #b7a878;
+    --brass: #8a5a26;
+    --brass-hover: #6e4419;
+    --on-brass: #f7f1de;
+    --result: #2c5c74;
+    --danger: #8a3a26;
+    --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --desk: #0d131a;
+      --paper: #182029;
+      --paper-deep: #212b36;
+      --ink: #e4d9ba;
+      --ink-soft: #98a19d;
+      --rule: #3c4956;
+      --brass: #cf9f55;
+      --brass-hover: #e3b573;
+      --on-brass: #1c2229;
+      --result: #7bb2c6;
+      --danger: #cd8163;
+    }
+  }
+  :root[data-theme="dark"] {
+    --desk: #0d131a;
+    --paper: #182029;
+    --paper-deep: #212b36;
+    --ink: #e4d9ba;
+    --ink-soft: #98a19d;
+    --rule: #3c4956;
+    --brass: #cf9f55;
+    --brass-hover: #e3b573;
+    --on-brass: #1c2229;
+    --result: #7bb2c6;
+    --danger: #cd8163;
+  }
+
+  * { box-sizing: border-box; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+
+  body {
+    margin: 0;
+    background: var(--desk);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding: 30px 14px 60px;
+  }
+
+  .sheet {
+    max-width: 640px;
+    margin: 0 auto;
+    background: var(--paper);
+    border-radius: 3px;
+    box-shadow: 0 18px 44px rgba(0,0,0,0.28), 0 2px 6px rgba(0,0,0,0.18);
+    padding: 34px 30px 30px;
+  }
+
+  header { text-align: center; }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.85rem;
+    margin: 0;
+    color: var(--ink);
+  }
+
+  .tagline {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--ink-soft);
+    font-size: 1rem;
+    margin: 8px 0 0;
+  }
+
+  .flourish { display: flex; align-items: center; gap: 10px; margin: 18px auto 4px; max-width: 220px; }
+  .flourish span { flex: 1; height: 1px; background: var(--rule); }
+  .flourish i { width: 6px; height: 6px; background: var(--brass); transform: rotate(45deg); display: block; flex-shrink: 0; }
+
+  section { border-top: 1px solid var(--rule); padding: 22px 0; }
+  header + section { border-top: none; padding-top: 26px; }
+
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin: 0 0 14px;
+    color: var(--ink);
+  }
+
+  label {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  input[type="number"], input[type="text"], select {
+    background: var(--paper-deep);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 9px 10px;
+    color: var(--ink);
+    font-size: 0.95rem;
+    font-family: inherit;
+    min-width: 0;
+  }
+  input[type="number"] { width: 100px; font-variant-numeric: tabular-nums; }
+  input[type="text"] { width: 100%; }
+
+  input:focus, select:focus, button:focus-visible {
+    outline: 2px solid var(--result);
+    outline-offset: 1px;
+  }
+
+  .scale-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .scale-row span { color: var(--ink-soft); font-size: 0.92rem; }
+
+  .tabs { display: flex; gap: 22px; margin-bottom: 18px; border-bottom: 1px solid var(--rule); }
+  .tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0 2px 10px;
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+    margin-bottom: -1px;
+  }
+  .tab.active { color: var(--ink); border-bottom-color: var(--brass); }
+
+  .input-row { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
+  .field { display: flex; flex-direction: column; }
+  .field.grow { flex: 1; min-width: 140px; }
+  .field.narrow { width: 90px; }
+
+  .reading {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--ink);
+    margin: 18px 0 0;
+  }
+  .reading strong { color: var(--result); font-weight: 600; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+  .table-scroll { overflow-x: auto; }
+  th, td {
+    text-align: left;
+    padding: 9px 10px 9px 0;
+    border-bottom: 1px solid var(--rule);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  th {
+    font-variant: small-caps;
+    letter-spacing: 0.02em;
+    color: var(--ink-soft);
+    font-weight: 600;
+    font-size: 0.88rem;
+  }
+  tr:last-child td { border-bottom: none; }
+  td.result-value { color: var(--result); font-weight: 600; }
+
+  .vehicle-row input[type="text"] { min-width: 132px; }
+  .vehicle-row input[type="number"] { width: 74px; }
+
+  .icon-btn {
+    background: none;
+    border: 1px solid var(--rule);
+    color: var(--danger);
+    border-radius: 4px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 1.05rem;
+    line-height: 1;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .icon-btn:hover { background: var(--paper-deep); }
+
+  .btn {
+    background: var(--brass);
+    color: var(--on-brass);
+    border: none;
+    padding: 10px 18px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn:hover { background: var(--brass-hover); }
+  .btn.ghost {
+    background: none;
+    color: var(--ink-soft);
+    border: 1px solid var(--rule);
+    margin-top: 16px;
+  }
+  .btn.ghost:hover { color: var(--ink); background: var(--paper-deep); }
+
+  .add-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-top: 16px; }
+
+  .note { font-size: 0.8rem; color: var(--ink-soft); margin: 10px 0 0; }
+
+  footer {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.78rem;
+    margin-top: 24px;
+  }
+
+  @media (max-width: 480px) {
+    .sheet { padding: 26px 18px 24px; }
+    h1 { font-size: 1.5rem; }
+    input[type="number"] { width: 80px; }
+    .tabs { gap: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header>
+    <h1>Naan Travel Reckoner</h1>
+    <p class="tagline">Convert map measurements to real distance and travel time.</p>
+    <div class="flourish" aria-hidden="true"><span></span><i></i><span></span></div>
+  </header>
+
+  <section class="scale-section">
+    <h2>Map scale</h2>
+    <div class="scale-row">
+      <span>1 cm on the map equals</span>
+      <input type="number" id="mapScale" min="0.001" step="any" inputmode="decimal" />
+      <span>km</span>
+    </div>
+  </section>
+
+  <section class="mode-section">
+    <div class="tabs" role="group" aria-label="Calculation direction">
+      <button class="tab" id="modeDistanceBtn" type="button">Distance to time</button>
+      <button class="tab" id="modeTimeBtn" type="button">Time to distance</button>
+    </div>
+
+    <div id="distanceInputs" class="input-row">
+      <div class="field">
+        <label for="distanceValue">Amount</label>
+        <input type="number" id="distanceValue" step="any" min="0" inputmode="decimal" />
+      </div>
+      <div class="field">
+        <label for="distanceUnit">Unit</label>
+        <select id="distanceUnit">
+          <option value="cm">cm on map</option>
+          <option value="km">km</option>
+          <option value="mi">miles</option>
+        </select>
+      </div>
+    </div>
+    <div id="timeInputs" class="input-row" style="display:none;">
+      <div class="field">
+        <label for="timeValue">Amount</label>
+        <input type="number" id="timeValue" step="any" min="0" inputmode="decimal" />
+      </div>
+      <div class="field">
+        <label for="timeUnit">Unit</label>
+        <select id="timeUnit">
+          <option value="min">minutes</option>
+          <option value="hr">hours</option>
+          <option value="day">days</option>
+        </select>
+      </div>
+    </div>
+
+    <p class="reading" id="summaryLine"></p>
+  </section>
+
+  <section class="results-section">
+    <h2 id="resultsTitle">Travel times</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr id="resultsHead"></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="vehicles-section">
+    <h2>Vehicles on record</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Speed (km/h)</th><th>Hrs/day</th><th></th></tr>
+        </thead>
+        <tbody id="vehicleBody"></tbody>
+      </table>
+    </div>
+
+    <div class="add-row">
+      <div class="field grow">
+        <label for="newVName">New vehicle</label>
+        <input type="text" id="newVName" placeholder="e.g. Griffon rider" />
+      </div>
+      <div class="field narrow">
+        <label for="newVSpeed">km/h</label>
+        <input type="number" id="newVSpeed" step="any" min="0" inputmode="decimal" />
+      </div>
+      <div class="field narrow">
+        <label for="newVHours">Hrs/day</label>
+        <input type="number" id="newVHours" step="any" min="0.1" max="24" value="24" inputmode="decimal" />
+      </div>
+      <button class="btn" id="addVehicleBtn" type="button">Add vehicle</button>
+    </div>
+    <p class="note">Hrs/day caps how long something travels before resting each day. Use 24 for anything that can go without stopping.</p>
+
+    <button class="btn ghost" id="resetBtn" type="button">Reset to defaults</button>
+  </section>
+
+  <footer>Speeds are estimates for worldbuilding — adjust anything to match Naan's own rules.</footer>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var KM_PER_MILE = 1.609344;
+  var STORAGE_KEY = 'naan-travel-reckoner-v1';
+
+  var DEFAULT_VEHICLES = [
+    { id: 'ox-cart', name: 'Ox Cart', speed: 3.5, hoursPerDay: 7 },
+    { id: 'horse-trot', name: 'Horse (Trot)', speed: 10, hoursPerDay: 24 },
+    { id: 'horse-canter', name: 'Horse (Canter)', speed: 20, hoursPerDay: 24 },
+    { id: 'horse-long', name: 'Horse (Long-Distance, w/ Rest)', speed: 10, hoursPerDay: 6 },
+    { id: 'slow-blimp', name: 'Slow Blimp', speed: 65, hoursPerDay: 24 },
+    { id: 'standard-airship', name: 'Standard Airship', speed: 100, hoursPerDay: 24 },
+    { id: 'fast-airship', name: 'Fast Airship (Zeppelin-Class)', speed: 125, hoursPerDay: 24 }
+  ];
+
+  var DEFAULT_STATE = {
+    mapScale: 100,
+    vehicles: DEFAULT_VEHICLES,
+    mode: 'distance',
+    distanceValue: 1.6,
+    distanceUnit: 'cm',
+    timeValue: 3,
+    timeUnit: 'hr'
+  };
+
+  function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
+  function uid() { return 'v' + Math.random().toString(36).slice(2, 9); }
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return clone(DEFAULT_STATE);
+      var parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.vehicles) || parsed.vehicles.length === 0) {
+        return clone(DEFAULT_STATE);
+      }
+      return {
+        mapScale: typeof parsed.mapScale === 'number' && parsed.mapScale > 0 ? parsed.mapScale : DEFAULT_STATE.mapScale,
+        vehicles: parsed.vehicles,
+        mode: parsed.mode === 'time' ? 'time' : 'distance',
+        distanceValue: typeof parsed.distanceValue === 'number' ? parsed.distanceValue : DEFAULT_STATE.distanceValue,
+        distanceUnit: parsed.distanceUnit || DEFAULT_STATE.distanceUnit,
+        timeValue: typeof parsed.timeValue === 'number' ? parsed.timeValue : DEFAULT_STATE.timeValue,
+        timeUnit: parsed.timeUnit || DEFAULT_STATE.timeUnit
+      };
+    } catch (e) {
+      return clone(DEFAULT_STATE);
+    }
+  }
+
+  function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch (e) { /* storage unavailable — continue without persistence */ }
+  }
+
+  var state = loadState();
+
+  // ---- conversions ----
+  function toKm(value, unit) {
+    if (unit === 'cm') return value * state.mapScale;
+    if (unit === 'mi') return value * KM_PER_MILE;
+    return value;
+  }
+  function toHours(value, unit) {
+    if (unit === 'min') return value / 60;
+    if (unit === 'day') return value * 24;
+    return value;
+  }
+
+  // ---- travel math ----
+  // Each vehicle travels at `speed` km/h for up to `hoursPerDay` hours in every
+  // 24-hour cycle, then rests for the remainder of that day.
+  function timeForDistance(km, speed, hoursPerDay) {
+    if (!speed || speed <= 0) return Infinity;
+    var cap = Math.min(Math.max(hoursPerDay || 24, 0.01), 24);
+    var dailyDist = speed * cap;
+    var fullDays = Math.floor(km / dailyDist);
+    var remainder = km - fullDays * dailyDist;
+    var remainderHours = remainder / speed;
+    return fullDays * 24 + remainderHours;
+  }
+
+  function distanceForTime(hours, speed, hoursPerDay) {
+    var cap = Math.min(Math.max(hoursPerDay || 24, 0.01), 24);
+    var fullDays = Math.floor(hours / 24);
+    var remainderHours = hours - fullDays * 24;
+    var travelHours = Math.min(remainderHours, cap);
+    return fullDays * (speed * cap) + travelHours * speed;
+  }
+
+  // ---- formatting ----
+  function formatNum(n) {
+    if (!isFinite(n)) return '\u2014';
+    var a = Math.abs(n);
+    if (a < 1) { var s = n.toFixed(2).replace(/0+$/, '').replace(/\.$/, ''); return s === '' || s === '-' ? '0' : s; }
+    if (a < 10) return n.toFixed(2);
+    if (a < 100) return n.toFixed(1);
+    return Math.round(n).toLocaleString();
+  }
+
+  function formatDuration(hours) {
+    if (!isFinite(hours)) return '\u2014';
+    if (hours < 1) return formatNum(hours * 60) + ' min';
+    if (hours < 24) {
+      var h = Math.floor(hours);
+      var m = Math.round((hours - h) * 60);
+      if (m >= 60) { h += 1; m = 0; }
+      return m === 0 ? (h + ' hr') : (h + ' hr ' + m + ' min');
+    }
+    var totalDays = hours / 24;
+    var wholeDays = Math.floor(totalDays);
+    var remHours = Math.round((totalDays - wholeDays) * 24);
+    if (remHours >= 24) { wholeDays += 1; remHours = 0; }
+    var dayLabel = wholeDays + (wholeDays === 1 ? ' day' : ' days');
+    return remHours === 0 ? dayLabel : (dayLabel + ' ' + remHours + ' hr');
+  }
+
+  // Compact multi-unit figure for dense table cells.
+  function distanceCell(km) {
+    return formatNum(km) + ' km \u00b7 ' + formatNum(km / KM_PER_MILE) + ' mi \u00b7 ' + formatNum(km / state.mapScale) + ' cm';
+  }
+
+  // Full sentence for the single narrative reading line.
+  function distanceSentence(km) {
+    return formatNum(km) + ' km, about ' + formatNum(km / KM_PER_MILE) + ' miles, or ' + formatNum(km / state.mapScale) + ' cm on the map';
+  }
+
+  function unitLabel(unit) {
+    return { cm: 'cm', km: 'km', mi: 'mi', min: 'min', hr: 'hr', day: 'day(s)' }[unit] || unit;
+  }
+
+  // ---- DOM refs ----
+  var els = {
+    mapScale: document.getElementById('mapScale'),
+    modeDistanceBtn: document.getElementById('modeDistanceBtn'),
+    modeTimeBtn: document.getElementById('modeTimeBtn'),
+    distanceInputs: document.getElementById('distanceInputs'),
+    timeInputs: document.getElementById('timeInputs'),
+    distanceValue: document.getElementById('distanceValue'),
+    distanceUnit: document.getElementById('distanceUnit'),
+    timeValue: document.getElementById('timeValue'),
+    timeUnit: document.getElementById('timeUnit'),
+    summaryLine: document.getElementById('summaryLine'),
+    resultsTitle: document.getElementById('resultsTitle'),
+    resultsHead: document.getElementById('resultsHead'),
+    resultsBody: document.getElementById('resultsBody'),
+    vehicleBody: document.getElementById('vehicleBody'),
+    newVName: document.getElementById('newVName'),
+    newVSpeed: document.getElementById('newVSpeed'),
+    newVHours: document.getElementById('newVHours'),
+    addVehicleBtn: document.getElementById('addVehicleBtn'),
+    resetBtn: document.getElementById('resetBtn')
+  };
+
+  // ---- rendering ----
+  function renderInputs() {
+    els.mapScale.value = state.mapScale;
+    els.distanceValue.value = state.distanceValue;
+    els.distanceUnit.value = state.distanceUnit;
+    els.timeValue.value = state.timeValue;
+    els.timeUnit.value = state.timeUnit;
+
+    var distMode = state.mode === 'distance';
+    els.modeDistanceBtn.classList.toggle('active', distMode);
+    els.modeTimeBtn.classList.toggle('active', !distMode);
+    els.modeDistanceBtn.setAttribute('aria-pressed', String(distMode));
+    els.modeTimeBtn.setAttribute('aria-pressed', String(!distMode));
+    els.distanceInputs.style.display = distMode ? 'flex' : 'none';
+    els.timeInputs.style.display = distMode ? 'none' : 'flex';
+    els.resultsTitle.textContent = distMode ? 'Travel times' : 'Distances covered';
+  }
+
+  function renderVehicleRows() {
+    els.vehicleBody.innerHTML = '';
+    state.vehicles.forEach(function (v) {
+      var tr = document.createElement('tr');
+      tr.className = 'vehicle-row';
+
+      var nameTd = document.createElement('td');
+      var nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.value = v.name;
+      nameInput.setAttribute('aria-label', 'Vehicle name');
+      nameInput.addEventListener('input', function () {
+        v.name = nameInput.value;
+        saveState();
+        renderResults();
+      });
+      nameTd.appendChild(nameInput);
+
+      var speedTd = document.createElement('td');
+      var speedInput = document.createElement('input');
+      speedInput.type = 'number';
+      speedInput.step = 'any';
+      speedInput.min = '0';
+      speedInput.value = v.speed;
+      speedInput.setAttribute('aria-label', 'Speed in kilometers per hour');
+      speedInput.addEventListener('input', function () {
+        v.speed = parseFloat(speedInput.value) || 0;
+        saveState();
+        renderResults();
+      });
+      speedTd.appendChild(speedInput);
+
+      var hoursTd = document.createElement('td');
+      var hoursInput = document.createElement('input');
+      hoursInput.type = 'number';
+      hoursInput.step = 'any';
+      hoursInput.min = '0.1';
+      hoursInput.max = '24';
+      hoursInput.value = v.hoursPerDay;
+      hoursInput.setAttribute('aria-label', 'Hours of travel per day');
+      hoursInput.addEventListener('input', function () {
+        var val = parseFloat(hoursInput.value);
+        v.hoursPerDay = isFinite(val) && val > 0 ? Math.min(val, 24) : 24;
+        saveState();
+        renderResults();
+      });
+      hoursTd.appendChild(hoursInput);
+
+      var actionTd = document.createElement('td');
+      var removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'icon-btn';
+      removeBtn.title = 'Remove vehicle';
+      removeBtn.setAttribute('aria-label', 'Remove ' + v.name);
+      removeBtn.textContent = '\u00d7';
+      removeBtn.addEventListener('click', function () {
+        state.vehicles = state.vehicles.filter(function (x) { return x.id !== v.id; });
+        saveState();
+        renderVehicleRows();
+        renderResults();
+      });
+      actionTd.appendChild(removeBtn);
+
+      tr.appendChild(nameTd);
+      tr.appendChild(speedTd);
+      tr.appendChild(hoursTd);
+      tr.appendChild(actionTd);
+      els.vehicleBody.appendChild(tr);
+    });
+  }
+
+  function appendResultRow(v, valueText) {
+    var tr = document.createElement('tr');
+    var nameTd = document.createElement('td');
+    nameTd.textContent = v.name;
+    var speedTd = document.createElement('td');
+    speedTd.textContent = v.speed + ' km/h' + (v.hoursPerDay < 24 ? ' (' + v.hoursPerDay + ' hr/day)' : '');
+    var valTd = document.createElement('td');
+    valTd.className = 'result-value';
+    valTd.textContent = valueText;
+    tr.appendChild(nameTd);
+    tr.appendChild(speedTd);
+    tr.appendChild(valTd);
+    els.resultsBody.appendChild(tr);
+  }
+
+  function renderResults() {
+    var distMode = state.mode === 'distance';
+    els.resultsHead.innerHTML = distMode
+      ? '<th>Vehicle</th><th>Speed</th><th>Time</th>'
+      : '<th>Vehicle</th><th>Speed</th><th>Distance</th>';
+    els.resultsBody.innerHTML = '';
+
+    if (distMode) {
+      var km = toKm(state.distanceValue || 0, state.distanceUnit);
+      els.summaryLine.innerHTML = 'That\u2019s <strong>' + distanceSentence(km) + '</strong>.';
+      state.vehicles.forEach(function (v) {
+        appendResultRow(v, formatDuration(timeForDistance(km, v.speed, v.hoursPerDay)));
+      });
+    } else {
+      var hrs = toHours(state.timeValue || 0, state.timeUnit);
+      els.summaryLine.innerHTML = 'Distance covered in <strong>' + formatNum(state.timeValue) + ' ' + unitLabel(state.timeUnit) + '</strong>:';
+      state.vehicles.forEach(function (v) {
+        appendResultRow(v, distanceCell(distanceForTime(hrs, v.speed, v.hoursPerDay)));
+      });
+    }
+  }
+
+  function renderAll() {
+    renderInputs();
+    renderVehicleRows();
+    renderResults();
+  }
+
+  // ---- events ----
+  els.mapScale.addEventListener('input', function () {
+    var val = parseFloat(els.mapScale.value);
+    state.mapScale = isFinite(val) && val > 0 ? val : state.mapScale;
+    saveState();
+    renderResults();
+  });
+
+  els.modeDistanceBtn.addEventListener('click', function () {
+    state.mode = 'distance';
+    saveState();
+    renderInputs();
+    renderResults();
+  });
+  els.modeTimeBtn.addEventListener('click', function () {
+    state.mode = 'time';
+    saveState();
+    renderInputs();
+    renderResults();
+  });
+
+  els.distanceValue.addEventListener('input', function () {
+    state.distanceValue = parseFloat(els.distanceValue.value) || 0;
+    saveState();
+    renderResults();
+  });
+  els.distanceUnit.addEventListener('change', function () {
+    state.distanceUnit = els.distanceUnit.value;
+    saveState();
+    renderResults();
+  });
+  els.timeValue.addEventListener('input', function () {
+    state.timeValue = parseFloat(els.timeValue.value) || 0;
+    saveState();
+    renderResults();
+  });
+  els.timeUnit.addEventListener('change', function () {
+    state.timeUnit = els.timeUnit.value;
+    saveState();
+    renderResults();
+  });
+
+  function tryAddVehicle() {
+    var name = els.newVName.value.trim();
+    var speed = parseFloat(els.newVSpeed.value);
+    var hours = parseFloat(els.newVHours.value);
+    if (!name || !isFinite(speed) || speed <= 0) {
+      els.newVName.focus();
+      return;
+    }
+    state.vehicles.push({
+      id: uid(),
+      name: name,
+      speed: speed,
+      hoursPerDay: isFinite(hours) && hours > 0 ? Math.min(hours, 24) : 24
+    });
+    els.newVName.value = '';
+    els.newVSpeed.value = '';
+    els.newVHours.value = '24';
+    saveState();
+    renderVehicleRows();
+    renderResults();
+  }
+  els.addVehicleBtn.addEventListener('click', tryAddVehicle);
+  [els.newVName, els.newVSpeed, els.newVHours].forEach(function (el) {
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); tryAddVehicle(); }
+    });
+  });
+
+  els.resetBtn.addEventListener('click', function () {
+    state = clone(DEFAULT_STATE);
+    saveState();
+    renderAll();
+  });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
